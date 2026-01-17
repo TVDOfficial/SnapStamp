@@ -23,6 +23,9 @@ A sleek PowerShell tool that stamps your photos with the original date and time 
 ## 📸 Screenshot
 
 ```
+
+<img width="982" height="764" alt="image" src="https://github.com/user-attachments/assets/47658602-3c2c-4a65-b010-616eab668386" />
+
 ┌─────────────────────────────────────────────────────────────┐
 │  SnapStamp                                                  │
 │  Stamp your photos with the original date and time          │
@@ -177,3 +180,4 @@ Found a bug? Have a feature request? Feel free to open an issue or submit a pull
 <p align="center">
   Made with ❤️ in PowerShell
 </p>
+
