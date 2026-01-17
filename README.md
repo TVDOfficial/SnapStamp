@@ -4,7 +4,7 @@ A sleek PowerShell tool that stamps your photos with the original date and time 
 
 ![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-blue?logo=powershell)
 ![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-GPL--3.0-blue)
 
 ---
 
@@ -166,7 +166,7 @@ If dates appear wrong, the photos likely don't have EXIF metadata. This happens 
 
 ## 📜 License
 
-MIT License - Feel free to use, modify, and distribute!
+GNU General Public License v3.0 - Free to use, modify, and distribute. See [LICENSE](LICENSE) for details.
 
 ---
 
@@ -179,6 +179,7 @@ Found a bug? Have a feature request? Feel free to open an issue or submit a pull
 <p align="center">
   Made with ❤️ in PowerShell
 </p>
+
 
 
 
