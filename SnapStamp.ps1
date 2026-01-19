@@ -510,7 +510,8 @@ function Get-OutputFormat {
 function Add-TimestampOverlay {
     param(
         [System.Drawing.Bitmap]$Bitmap,
-        [DateTime]$DateTime
+        [DateTime]$DateTime,
+        [int]$PhotoNumber
     )
     
     $graphics = $null
@@ -523,30 +524,49 @@ function Add-TimestampOverlay {
         $graphics.SmoothingMode = "AntiAlias"
         $graphics.TextRenderingHint = "ClearTypeGridFit"
         
-        # Format: HH:mm:ss dd/MM/yyyy
-        $text = $DateTime.ToString("HH:mm:ss dd/MM/yyyy")
-        
         # Scale font size based on image dimensions
         $fontSize = [Math]::Max(16, [Math]::Min(48, $Bitmap.Width / 40))
         $font = New-Object System.Drawing.Font("Consolas", [float]$fontSize, [System.Drawing.FontStyle]::Bold)
         
-        $textSize = $graphics.MeasureString($text, $font)
+        # ============================================================================
+        # BOTTOM-RIGHT: Date/Time stamp
+        # ============================================================================
+        $dateText = $DateTime.ToString("HH:mm:ss dd/MM/yyyy")
+        $dateTextSize = $graphics.MeasureString($dateText, $font)
         $padding = [int]($fontSize * 0.5)
         $margin = [int]($fontSize * 0.8)
         
-        $rectWidth = [int][Math]::Ceiling($textSize.Width) + ($padding * 2)
-        $rectHeight = [int][Math]::Ceiling($textSize.Height) + ($padding * 2)
-        $x = [Math]::Max(0, $Bitmap.Width - $rectWidth - $margin)
-        $y = [Math]::Max(0, $Bitmap.Height - $rectHeight - $margin)
+        $dateRectWidth = [int][Math]::Ceiling($dateTextSize.Width) + ($padding * 2)
+        $dateRectHeight = [int][Math]::Ceiling($dateTextSize.Height) + ($padding * 2)
+        $dateX = [Math]::Max(0, $Bitmap.Width - $dateRectWidth - $margin)
+        $dateY = [Math]::Max(0, $Bitmap.Height - $dateRectHeight - $margin)
         
-        # Draw semi-transparent black background
+        # Draw semi-transparent black background for date
         $blackBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(200, 0, 0, 0))
-        $backgroundRect = New-Object System.Drawing.Rectangle($x, $y, $rectWidth, $rectHeight)
-        $graphics.FillRectangle($blackBrush, $backgroundRect)
+        $dateBackgroundRect = New-Object System.Drawing.Rectangle($dateX, $dateY, $dateRectWidth, $dateRectHeight)
+        $graphics.FillRectangle($blackBrush, $dateBackgroundRect)
         
-        # Draw yellow text
+        # Draw yellow text for date
         $yellowBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 220, 0))
-        $graphics.DrawString($text, $font, $yellowBrush, ($x + $padding), ($y + $padding))
+        $graphics.DrawString($dateText, $font, $yellowBrush, ($dateX + $padding), ($dateY + $padding))
+        
+        # ============================================================================
+        # TOP-LEFT: Photo number
+        # ============================================================================
+        $photoText = "photo $PhotoNumber"
+        $photoTextSize = $graphics.MeasureString($photoText, $font)
+        
+        $photoRectWidth = [int][Math]::Ceiling($photoTextSize.Width) + ($padding * 2)
+        $photoRectHeight = [int][Math]::Ceiling($photoTextSize.Height) + ($padding * 2)
+        $photoX = $margin
+        $photoY = $margin
+        
+        # Draw semi-transparent black background for photo number
+        $photoBackgroundRect = New-Object System.Drawing.Rectangle($photoX, $photoY, $photoRectWidth, $photoRectHeight)
+        $graphics.FillRectangle($blackBrush, $photoBackgroundRect)
+        
+        # Draw yellow text for photo number
+        $graphics.DrawString($photoText, $font, $yellowBrush, ($photoX + $padding), ($photoY + $padding))
         
     } finally {
         if ($null -ne $yellowBrush) { $yellowBrush.Dispose() }
@@ -742,6 +762,7 @@ $startButton.Add_Click({
     $processed = 0
     $failed = 0
     $noExifCount = 0
+    $photoNumber = 0
     
     foreach ($file in $files) {
         if ($script:CancelRequested) { break }
@@ -780,7 +801,9 @@ $startButton.Add_Click({
             $g.DrawImage($image, 0, 0, $image.Width, $image.Height)
             $g.Dispose()
             
-            Add-TimestampOverlay -Bitmap $bitmap -DateTime $photoDate
+            # Increment photo number for this successfully processed image
+            $photoNumber++
+            Add-TimestampOverlay -Bitmap $bitmap -DateTime $photoDate -PhotoNumber $photoNumber
             
             # Save
             $outExt = if ($file.Extension.ToLowerInvariant() -in @(".heic", ".heif")) { ".jpg" } else { $file.Extension }
